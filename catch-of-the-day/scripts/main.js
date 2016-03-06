@@ -12,7 +12,17 @@ var h = require('./helpers')
 
 /* App */
 var App = React.createClass({
-
+  getInitialState: function(){
+    return {
+      fishes: {},
+      order: {}
+    }
+  },
+  addFish: function(fish){
+    var timestamp = (new Date()).getTime()
+    this.state.fishes['fish-'+timestamp] = fish // updates the state object
+    this.setState({fishes: this.state.fishes}) // actually set the state and be efficient by telling it what changed
+  },
   render: function() {
     return (
       <div className="catch-of-the-day">
@@ -20,11 +30,41 @@ var App = React.createClass({
           <Header tagline="A fresh seafood market" />
         </div>
         <Order />
-        <Inventory />
+        <Inventory addFish={this.addFish} />
       </div>
     )
   }
 
+})
+
+var AddFishForm = React.createClass({
+  render: function(){
+    return (
+      <form ref="fishForm" className="fish-edit" onSubmit={this.createFish}>
+        <input type="text" ref="name" placeholder="Fish Name" />
+        <input type="text" ref="price" placeholder="Fish Price" />
+        <select ref="status">
+          <option value="available">In stock</option>
+          <option value="unavailable">Out of stock</option>
+        </select>
+        <textarea type="text" ref="desc" placeholder="Desc"></textarea>
+        <input type="text" ref="image" placeholder="URL to image"></input>
+        <button type="submit">Add Item</button>
+      </form>
+    )
+  },
+  createFish: function(e){
+    e.preventDefault()
+    var fish = {
+      name: this.refs.name.value,
+      price: this.refs.price.value,
+      status: this.refs.status.value,
+      desc: this.refs.desc.value,
+      image: this.refs.image.value
+    }
+    this.props.addFish(fish)
+    this.refs.fishForm.reset()
+  }
 })
 
 var Header = React.createClass({
@@ -56,7 +96,10 @@ var Order = React.createClass({
 var Inventory = React.createClass({
   render: function(){
     return (
-      <p>Inventory</p>
+      <div>
+        <h2>Inventory</h2>
+        <AddFishForm {...this.props} />
+      </div>
     )
   }
 })
